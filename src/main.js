@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { createBeadGeometry, BeadMotion } from './beads.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { createBeadGeometry, createBoardGeometry, BeadMotion } from './beads.js';
 import { mountUI, onUI, setUIStatus } from './ui.jsx';
 import { frameCount, frameRange } from './frame-range.js';
 import './style.css';
@@ -45,25 +46,30 @@ const stage=$('stage');
 let renderer;
 try { renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true}); }
 catch(error){stage.innerHTML='<div class="webgl-error">无法启动 3D 预览，请使用支持 WebGL 的浏览器并开启硬件加速。</div>';throw error;}
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor('#e9e8e1');renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor('#eee8dc');renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;stage.prepend(renderer.domElement);
 const scene=new THREE.Scene();
 const room=new RoomEnvironment();const pmrem=new THREE.PMREMGenerator(renderer);const environment=pmrem.fromScene(room,.04);
-scene.environment=environment.texture;scene.environmentIntensity=.55;room.dispose();pmrem.dispose();
+scene.environment=environment.texture;scene.environmentIntensity=.30;room.dispose();pmrem.dispose();
 const camera=new THREE.PerspectiveCamera(36,1,.1,500);camera.position.set(0,0,110);
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=true;controls.enableRotate=true;controls.minDistance=12;controls.maxDistance=210;controls.maxPolarAngle=Math.PI*.82;
-scene.add(new THREE.HemisphereLight(0xf5f7ff,0x77736a,.65));
-const light=new THREE.DirectionalLight(0xfff5e7,2.2);light.position.set(-35,50,85);light.castShadow=true;
+// The bead scene is Z-up. Broad studio illumination makes the plastic's
+// highlights read as a soft surface instead of bright metallic rings.
+const ambient=new THREE.HemisphereLight(0xfff9ed,0x847969,.75);ambient.position.set(0,0,1);scene.add(ambient);
+RectAreaLightUniformsLib.init();
+const softbox=new THREE.RectAreaLight(0xfff5e8,3.2,85,65);
+softbox.position.set(-35,25,65);softbox.lookAt(0,0,0);scene.add(softbox);
+const light=new THREE.DirectionalLight(0xfff5e7,1.15);light.position.set(-35,50,85);light.castShadow=true;
 light.shadow.mapSize.set(4096,4096);Object.assign(light.shadow.camera,{left:-68,right:68,top:48,bottom:-48,near:1,far:220});light.shadow.normalBias=.025;light.shadow.bias=-.00005;light.shadow.camera.updateProjectionMatrix();scene.add(light);
-const fillLight=new THREE.DirectionalLight(0xddeaff,.6);fillLight.position.set(35,-20,50);scene.add(fillLight);
-const board=new THREE.Mesh(new THREE.BoxGeometry(100,58,.85),new THREE.MeshPhysicalMaterial({color:'#dedacf',roughness:.5,clearcoat:.18}));board.position.z=-.425;board.receiveShadow=true;board.castShadow=true;scene.add(board);
-const table=new THREE.Mesh(new THREE.PlaneGeometry(500,500),new THREE.MeshStandardMaterial({color:'#e9e8e1',roughness:1}));table.position.z=-1.0;table.receiveShadow=true;scene.add(table);
+const fillLight=new THREE.DirectionalLight(0xe9efff,.35);fillLight.position.set(35,-20,50);scene.add(fillLight);
+const board=new THREE.Mesh(createBoardGeometry(),new THREE.MeshPhysicalMaterial({color:'#eadfcb',roughness:.48,clearcoat:.08,clearcoatRoughness:.5}));board.receiveShadow=true;board.castShadow=true;scene.add(board);
+const table=new THREE.Mesh(new THREE.PlaneGeometry(500,500),new THREE.MeshStandardMaterial({color:'#eee8dc',roughness:1}));table.position.z=-1.5;table.receiveShadow=true;scene.add(table);
 const beadGeometry=createBeadGeometry();
-const beadMaterial=new THREE.MeshPhysicalMaterial({roughness:.29,metalness:0,clearcoat:.28,clearcoatRoughness:.3,ior:1.46,vertexColors:true});
+const beadMaterial=new THREE.MeshPhysicalMaterial({roughness:.43,metalness:0,clearcoat:.10,clearcoatRoughness:.45,ior:1.46,specularIntensity:.65,vertexColors:true});
 const flatMaterial=new THREE.MeshBasicMaterial();
 const pegGeometry=new THREE.CylinderGeometry(.078,.105,.8,8);pegGeometry.rotateX(Math.PI/2);pegGeometry.translate(0,0,.4);
-const pegMaterial=new THREE.MeshPhysicalMaterial({color:'#c6c3b4',roughness:.5,clearcoat:.15});
+const pegMaterial=new THREE.MeshPhysicalMaterial({color:'#e4d5bb',roughness:.48,clearcoat:.08});
 function buildBoard(){
  if(mesh){scene.remove(mesh);mesh.dispose();}
  if(pegs){scene.remove(pegs);pegs.dispose();}

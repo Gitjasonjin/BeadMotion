@@ -4,11 +4,12 @@ import * as THREE from 'three';
 // its edges; a torus or a bevelled flat ring does not have the same silhouette.
 export function createBeadGeometry() {
   const profile = [
-    [.445, 0], [.473, .018], [.485, .05], [.485, 1.10],
-    [.474, 1.133], [.449, 1.15], [.269, 1.15],
-    [.241, 1.132], [.23, 1.10], [.23, .05], [.24, .018], [.269, 0], [.445, 0],
+    [.425, 0], [.467, .02], [.485, .06], [.485, 1.07],
+    [.479, 1.10], [.458, 1.132], [.425, 1.15], [.295, 1.15],
+    [.258, 1.135], [.236, 1.105], [.23, 1.07], [.23, .06],
+    [.248, .02], [.29, 0], [.425, 0],
   ].map(([radius, height]) => new THREE.Vector2(radius, height));
-  const geometry = new THREE.LatheGeometry(profile, 20);
+  const geometry = new THREE.LatheGeometry(profile, 24);
   geometry.rotateX(Math.PI / 2);
   // Baked cavity occlusion complements the moving, real-time shadows. The
   // opening remains hollow: no dark disk is used to fake the hole.
@@ -17,11 +18,32 @@ export function createBeadGeometry() {
   for (let i = 0; i < positions.count; i++) {
     const radius = Math.hypot(positions.getX(i), positions.getY(i));
     const height = positions.getZ(i) / 1.15;
-    const inner = radius < .255;
-    const shade = inner ? .31 + .56 * height : .80 + .20 * height;
+    // Keep the lip's base color continuous. Darkening only the deep cavity
+    // avoids the painted-on dark stripe around the opening at close range.
+    const cavity = (1 - THREE.MathUtils.smoothstep(radius, .25, .30))
+      * (1 - THREE.MathUtils.smoothstep(height, .10, .98));
+    const shade = 1 - cavity * .38 - .08 * (1 - height);
     colors.set([shade, shade, shade], i * 3);
   }
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geometry;
+}
+
+// A molded plate with rounded plan-view corners and a rolled edge. Its top
+// stays at z=0 so the bead/peg placement and replacement animation agree.
+export function createBoardGeometry() {
+  const w=50,h=29,r=2.2;
+  const shape=new THREE.Shape();
+  shape.moveTo(-w+r,-h);
+  shape.lineTo(w-r,-h);shape.quadraticCurveTo(w,-h,w,-h+r);
+  shape.lineTo(w,h-r);shape.quadraticCurveTo(w,h,w-r,h);
+  shape.lineTo(-w+r,h);shape.quadraticCurveTo(-w,h,-w,h-r);
+  shape.lineTo(-w,-h+r);shape.quadraticCurveTo(-w,-h,-w+r,-h);
+  const geometry=new THREE.ExtrudeGeometry(shape,{
+    depth:.9,steps:1,bevelEnabled:true,bevelThickness:.28,
+    bevelSize:.28,bevelSegments:4,curveSegments:8,
+  });
+  geometry.translate(0,0,-1.18);
   return geometry;
 }
 

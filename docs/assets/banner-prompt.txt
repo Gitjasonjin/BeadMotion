@@ -1,0 +1,9 @@
+Use case: stylized-concept.
+Asset type: wide GitHub README banner for the existing project BeanMotion, a browser-based 3D fuse-bead video studio.
+Primary request: create a polished editorial 3D banner connecting moving video frames with physical hollow plastic fuse beads.
+Scene/backdrop: warm off-white studio surface, quiet refined composition and generous breathing room.
+Subject: one elegant isometric rectangular pegboard made of hundreds of small upright hollow cylindrical fuse beads; the bead colors form a pixel-art sunset over mountains and water, in coral, apricot, muted lavender and deep teal. A few beads lift vertically above their matching slots, implying frame-by-frame animated replacement. A subtle strip of three small sunset frames suggests a video timeline.
+Style/medium: high-quality tactile 3D illustration, precise rounded bead rims, clearly visible central holes, soft contact shadows, realistic matte plastic, understated and sophisticated.
+Composition/framing: panoramic approximately 3:1 banner, balanced title and illustration, all important content comfortably inside the edges.
+Text (verbatim): "BeanMotion". Large clean dark charcoal sans-serif title, spelled B-e-a-n-M-o-t-i-o-n, clearly legible. No other text.
+Constraints: actual hollow fuse beads on a pegboard, no coffee beans, no food, no people, no computer screen or invented UI, no watermark. Match a minimal cream-colored creative tool with a sunset demo.

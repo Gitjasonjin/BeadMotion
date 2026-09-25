@@ -1,36 +1,79 @@
+![BeanMotion · 用立体拼豆重新演绎每一帧](docs/assets/banner.png)
+
 # BeanMotion
 
-基于 Three.js 的电子拼豆视频工作室。视频由浏览器本地解码，通过 Canvas 采样为颜色矩阵，再驱动 InstancedMesh 中每一颗带孔立体拼豆。
+把视频变成会动的立体拼豆。在浏览器里调整颗粒、色彩与视角，导出属于你的拼豆动画，素材全程留在本地。
 
-界面使用 React 19 与 [Appica UI](https://appica.dev/ui) 的 Button、Select、Slider、Switch、ToggleGroup、Tooltip 和 Dialog。采用官方预编译样式与语义颜色变量，桌面端为画板 / 侧栏工作区，小屏端自动纵向排列。渲染循环独立于 React，组件通过动作接口调用播放器。
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
+[![Three.js 0.183](https://img.shields.io/badge/Three.js-0.183-292929?style=flat-square&logo=threedotjs&logoColor=white)](https://threejs.org/)
+[![Vite 7](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
+[![WebCodecs · 视频导出](https://img.shields.io/badge/WebCodecs-Video_Export-B84C27?style=flat-square)](https://www.w3.org/TR/webcodecs/)
 
-## 启动
+## 界面预览
+
+内置「落日漫游」演示：立体画板、播放时间轴与拼豆设置。
+
+![BeanMotion 工作台：落日拼豆画板、帧序列和参数侧栏](docs/assets/studio-overview.png)
+
+<details>
+<summary>查看拼豆细节</summary>
+
+中空豆孔、圆润口沿与塑料光泽，近距离查看立体拼豆的质感。
+
+![放大后的落日拼豆：中空豆孔、塑料质感与接触阴影](docs/assets/bead-detail.png)
+
+</details>
+
+## 功能
+
+- **视频变拼豆**：导入本地视频，或直接体验 12 秒落日演示；支持播放、逐帧、倍速与循环。
+- **自由调色与造型**：64×36–160×90 密度、6 / 12 / 24 / 30 FPS 采样，调整间距、高度、塑料质感，切换原片色彩或 32 色色板。
+- **立体预览**：正面 / 立体视角、旋转缩放与全屏，支持逐颗提起、替换、落回的换豆动画。
+- **图片与视频导出**：保存 PNG，拖动游标选择帧范围，逐帧编码 MP4 / WebM；可保留原声，最高支持 4K，支持取消。
+- **本地处理**：视频解码、渲染与导出均在浏览器完成，素材不上传服务器；界面适配桌面与小屏。
+
+## 快速开始
+
+使用 Node.js 20.19+ 或 22.12+。
 
 ```sh
 npm install
 npm run dev
 ```
 
-生产构建：`npm run build`；构建预览：`npm run preview`。
+打开终端显示的本地地址即可体验。生产构建使用 `npm run build`，预览构建使用 `npm run preview`。
 
-## 功能
+## 使用说明
 
-- 内置 12 秒动态落日演示，无需额外素材。
-- 导入本地视频，按所选帧率采样，支持播放、暂停、循环、时间轴、逐帧、倍速和预览声音开关。内置演示无音轨。
-- 64×36 至 160×90 拼豆密度、间距、原片色彩 / 32 色色板、质感切换。
-- 正面 / 立体视角，滚轮缩放、拖动旋转、全屏。
-- 高筒中空塑料拼豆，圆润口沿、孔壁遮蔽、环境反射与实时投影，配套定位柱豆板；高度可调。
-- 默认采用 64×36、原片色彩、12 FPS 和立体视角。采样帧率可选 6 / 12 / 24 / 30 FPS；选择 6 FPS 可体验定格节奏。
-- 启用逐颗换豆时，颜色变化的豆子会提起、替换后落回。动作时长随帧率和播放速度缩短，在下一个采样帧到来前完成；期间到达的新颜色会合并到下一次替换，保证豆子先落稳。关闭该开关可恢复即时逐帧换色。
-- 保存当前 3D 画面为 PNG，或拖动帧序列两端的游标选择开始帧和结束帧后离线导出视频，默认选择全部帧。游标支持触摸拖动和键盘方向键逐帧微调；“全部帧”恢复完整范围。
-- 帧号从 1 开始，起止帧都包含在导出中；帧率就是当前采样帧率。例如 24 FPS 下的第 25–48 帧对应原片 1–2 秒，导出为 24 帧、1 秒。最后一帧若不足一帧时长，则保留其实际时长。
-- 导出默认保留原声，可独立关闭；预览静音不影响导出。音轨按相同时间范围裁切并从零对齐。无音轨的素材自然输出无声视频。
-- 导出使用 Mediabunny / WebCodecs 逐帧解码、渲染和编码，完全不使用 MediaRecorder 或 captureStream。优先输出 H.264 / AAC MP4，编码器不可用时尝试 VP9 / Opus 或 VP8 / Opus WebM。
-- 换豆动作使用确定性虚拟时钟计算，与处理速度无关；导出帧数始终等于所选帧数。导出时画板中央显示 React Bits ThoughtLine 进度面板，包含可折叠处理步骤、耗时、实际分辨率、帧率、帧范围与音轨状态；完成、取消和失败显示对应结果，可手动关闭。导出过程可取消；取消不会保存残缺文件，结束后恢复原预览位置并保持暂停。
-- 视频保留原始比例并居中于 16:9 画板；不上传视频到服务器。
+- 推荐使用 Chrome / Edge 并开启硬件加速。可导入的视频格式取决于浏览器解码器，MOV 建议使用 H.264 编码。
+- 视频导出需要 WebCodecs，优先使用 H.264 / AAC MP4，不可用时尝试 VP9 / Opus 或 VP8 / Opus WebM。导出采用逐帧编码，不依赖录屏。
+- 默认导出全部帧，也可选择片段；起止帧均包含在内。预览静音不影响导出原声，可在导出设置中独立关闭。
+- 分辨率可跟随画板（最大 1920×1080），或选择固定 16:9 的 1080p、2K、4K。导出文件暂存在内存中，长视频建议分段处理。
 
-Chrome / Edge 支持较完整。视频格式依赖浏览器解码器，MOV 建议使用 H.264 编码。离线导出需要可用的 WebCodecs 编解码器；不支持时会给出提示，不会降级为录屏。处理耗时取决于硬件、密度与帧数，页面进入后台可能变慢，但不影响编码时间戳。导出分辨率默认“跟随画板”（按预览比例取偶数像素，最大 1920×1080），也可选择固定 16:9 的 1080p（1920×1080）、2K / 1440p（2560×1440）或 4K（3840×2160）。拼豆场景按所选像素尺寸重新渲染，码率随分辨率提升；导出期间视角与设置锁定，结束或取消后恢复预览尺寸。编码文件暂存在浏览器内存中，较长素材建议分段导出。时间轴游标所在的缩略图与主画板共用当前采样画面，其余缩略图为素材概览。定位时等待新画面解码，暂停和逐帧查看直接落稳到当前帧。
+## 开发
 
-实现参考：[Three.js InstancedMesh](https://threejs.org/docs/pages/InstancedMesh.html)。
+基于 React、[Appica UI](https://appica.dev/ui)、Three.js 与 Mediabunny。视频经 Canvas 采样后驱动 InstancedMesh 拼豆阵列，渲染循环独立于 React。
 
-几何、动作与帧范围验证：`node --test scripts/beads.test.mjs scripts/frame-range.test.mjs`。浏览器流程验证：先启动开发服务，再运行 `node scripts/smoke.mjs`（需要 Chrome）。声音与离线导出验证：`node scripts/export.test.mjs`，覆盖禁用录屏 API、精确帧数 / 时长、音轨内容与裁切、取消和最后单帧导出。
+<details>
+<summary>验证命令</summary>
+
+几何、动画与帧范围：
+
+```sh
+node --test scripts/beads.test.mjs scripts/frame-range.test.mjs
+```
+
+浏览器验证（先启动开发服务，需要本机安装 Chrome）：
+
+```sh
+node scripts/smoke.mjs
+node scripts/export.test.mjs
+node scripts/export-resolution.test.mjs
+node scripts/export-overlay.test.mjs
+```
+
+</details>
+
+## 许可证
+
+本项目采用 [MIT 许可证](LICENSE)，Copyright © 2026 Jasonjin。
